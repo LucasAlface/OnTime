@@ -1,6 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Get, Res, Req, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import type { RegisterRequest, LoginRequest } from './auth.interfaces.js';
+import type { Response, Request } from 'express';
+
 
 
 @Controller('auth')
@@ -8,13 +10,46 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  register(@Body() body: RegisterRequest) {
-    return this.authService.register(body.name, body.email, body.password);
+  async register(
+    @Body() body: RegisterRequest,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const { user, token } = await this.authService.register(body.name, body.email, body.password);
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 1000, 
+    });
+    return user;
   }
 
   @Post('login')
-  login(@Body() body: LoginRequest) {
-    return this.authService.login(body.email, body.password);
-  }
-}
+  async login(
+    @Body() body: LoginRequest,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const { user, token } = await this.authService.login(body.email, body.password);
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 1000, 
+    });
 
+    return user;
+  }
+
+  @Get('me')
+  async me(
+    @Req() req: Request,
+  ) {
+    const token = req.cookies.token;
+    if (!token) {
+      throw new UnauthorizedException('No token provided');
+    }
+    const { user } = await this.authService.me(token);
+    return user;
+  }
+
+}
