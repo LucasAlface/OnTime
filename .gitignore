@@ -8,6 +8,7 @@ coverage/
 .env
 .env.*
 !.env.example
+gtfs_feed - cópia
 
 .DS_Store
 *.log

@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { getUser } from "../services/api/User";
+
+const Map = dynamic(() => import("@/components/map/Map"), {
+  ssr: false,
+  loading: () => <p>Loading map…</p>,
+});
 
 interface User {
   id: number;
@@ -27,9 +33,6 @@ export default function Home() {
   if (!user) return <p>Not logged in</p>;
 
   return (
-    <main className="home-page">
-      <h1>Home</h1>
-      <p>Welcome, {user.name}!</p>
-    </main>
+    <Map />
   );
 }
