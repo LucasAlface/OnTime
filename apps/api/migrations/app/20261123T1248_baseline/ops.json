@@ -1,0 +1,334 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "schema.tiger",
+    "label": "Create schema \"tiger\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"tiger\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"tiger\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "schema.topology",
+    "label": "Create schema \"topology\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"topology\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"topology\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "extension.fuzzystrmatch",
+    "label": "Create extension \"fuzzystrmatch\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "dependency",
+        "name": "fuzzystrmatch"
+      }
+    },
+    "precheck": [
+      {
+        "description": "verify extension \"fuzzystrmatch\" is not installed",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_extension\" WHERE \"extname\" = $1) AS \"result\"",
+        "params": [
+          "fuzzystrmatch"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "extension \"fuzzystrmatch\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create extension \"fuzzystrmatch\"",
+        "sql": "CREATE EXTENSION IF NOT EXISTS \"fuzzystrmatch\" WITH SCHEMA \"public\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "confirm extension \"fuzzystrmatch\" is installed",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_extension\" WHERE \"extname\" = $1) AS \"result\"",
+        "params": [
+          "fuzzystrmatch"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "extension \"fuzzystrmatch\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "extension.postgis_tiger_geocoder",
+    "label": "Create extension \"postgis_tiger_geocoder\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "tiger",
+        "objectType": "dependency",
+        "name": "postgis_tiger_geocoder"
+      }
+    },
+    "precheck": [
+      {
+        "description": "verify extension \"postgis_tiger_geocoder\" is not installed",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_extension\" WHERE \"extname\" = $1) AS \"result\"",
+        "params": [
+          "postgis_tiger_geocoder"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "extension \"postgis_tiger_geocoder\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create extension \"postgis_tiger_geocoder\"",
+        "sql": "CREATE EXTENSION IF NOT EXISTS \"postgis_tiger_geocoder\" WITH SCHEMA \"tiger\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "confirm extension \"postgis_tiger_geocoder\" is installed",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_extension\" WHERE \"extname\" = $1) AS \"result\"",
+        "params": [
+          "postgis_tiger_geocoder"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "extension \"postgis_tiger_geocoder\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "extension.postgis_topology",
+    "label": "Create extension \"postgis_topology\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "topology",
+        "objectType": "dependency",
+        "name": "postgis_topology"
+      }
+    },
+    "precheck": [
+      {
+        "description": "verify extension \"postgis_topology\" is not installed",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_extension\" WHERE \"extname\" = $1) AS \"result\"",
+        "params": [
+          "postgis_topology"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "extension \"postgis_topology\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create extension \"postgis_topology\"",
+        "sql": "CREATE EXTENSION IF NOT EXISTS \"postgis_topology\" WITH SCHEMA \"topology\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "confirm extension \"postgis_topology\" is installed",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_extension\" WHERE \"extname\" = $1) AS \"result\"",
+        "params": [
+          "postgis_topology"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "extension \"postgis_topology\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.User",
+    "label": "Create table \"User\"",
+    "summary": "Creates table \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"User\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"User\"",
+        "sql": "CREATE TABLE \"public\".\"User\" (\n  \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"email\" text NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"name\" text,\n  \"passwordHash\" text NOT NULL,\n  \"updatedAt\" timestamptz(3) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"User\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"User\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"User\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.spatial_ref_sys",
+    "label": "Create table \"spatial_ref_sys\"",
+    "summary": "Creates table \"spatial_ref_sys\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "spatial_ref_sys"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"spatial_ref_sys\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"spatial_ref_sys\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"spatial_ref_sys\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"spatial_ref_sys\"",
+        "sql": "CREATE TABLE \"public\".\"spatial_ref_sys\" (\n  \"auth_name\" character varying(256),\n  \"auth_srid\" int4,\n  \"proj4text\" character varying(2048),\n  \"srid\" int4 NOT NULL,\n  \"srtext\" character varying(2048),\n  CONSTRAINT \"spatial_ref_sys_pkey\" PRIMARY KEY (\"srid\"),\n  CONSTRAINT \"spatial_ref_sys_srid_check\" CHECK (((srid > 0) AND (srid <= 998999)))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"spatial_ref_sys\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"spatial_ref_sys\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"spatial_ref_sys\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "unique.User.User_email_key",
+    "label": "Add unique constraint on \"User\" (email)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "User_email_key",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"User_email_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "User_email_key",
+          "public",
+          "\"public\".\"User\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"User_email_key\" on \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"User_email_key\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ADD CONSTRAINT \"User_email_key\" UNIQUE (\"email\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"User_email_key\" exists on (email)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "User_email_key",
+          "public",
+          "\"public\".\"User\"",
+          "u",
+          "[\"email\"]"
+        ]
+      }
+    ]
+  }
+]
