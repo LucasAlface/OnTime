@@ -3,6 +3,7 @@
   "name": "ontime",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@12.21.0",
   "scripts": {
     "dev:web": "pnpm --filter @ontime/web dev",
     "dev:api": "pnpm --filter @ontime/api start:dev",
