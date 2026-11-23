@@ -15,10 +15,11 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ) {
     const { user, token } = await this.authService.register(body.name, body.email, body.password);
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 60 * 60 * 1000, 
     });
     return user;
@@ -30,10 +31,11 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ) {
     const { user, token } = await this.authService.login(body.email, body.password);
+    const isProduction = process.env.NODE_ENV === 'production';
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 60 * 60 * 1000, 
     });
 
