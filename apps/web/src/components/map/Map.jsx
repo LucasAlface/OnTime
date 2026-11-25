@@ -10,7 +10,7 @@ import {
   ScaleControl,
   Source,
 } from "@vis.gl/react-maplibre";
-import { getCoordinates } from "@/services/location/Tracker";
+import { getCoordinates, getRoutes } from "@/services/location/Tracker";
 
 const STOPS = [
   { id: "aliados", name: "Aliados", latitude: 41.148944, longitude: -8.611278 },
@@ -34,6 +34,8 @@ const STOPS = [
   },
   { id: "viso", name: "Viso", latitude: 41.17784, longitude: -8.64228 },
 ];
+
+const ROUTES = await getRoutes();
 
 const APPROXIMATE_ROUTE = {
   type: "Feature",
@@ -66,19 +68,25 @@ export default function Map() {
   const [routeDuration, setRouteDuration] = useState(null);
   const [routeStatus, setRouteStatus] = useState("loading");
   const [selectedStop, setSelectedStop] = useState(null);
-  const [busCoordinates, setBusCoordinates] = useState(null);
+  const [busCoordinates, setBusCoordinates] = useState({});
 
   useEffect(() => {
-    getCoordinates((coordinates) => {
-      const [longitude, latitude] = coordinates[0] ?? [];
+    ROUTES.forEach(({ line }) => {
+      getCoordinates((coordinates) => {
+        const [longitude, latitude] = coordinates[0] ?? [];
 
-      if (Number.isFinite(longitude) && Number.isFinite(latitude)) {
-        setBusCoordinates({ longitude, latitude });
-      }
-    }).catch((error) => {
-      console.error("Failed to update bus location:", error);
+        if (Number.isFinite(longitude) && Number.isFinite(latitude)) {
+          setBusCoordinates((current) => ({
+            ...current,
+            [line]: { longitude, latitude },
+          }));
+        }
+      }, line).catch((error) => {
+        console.error(`Failed to update bus location for route ${line}:`, error);
+      });
     });
   }, []);
+    
 
   useEffect(() => {
     const controller = new AbortController();
@@ -166,24 +174,25 @@ export default function Map() {
             </Marker>
           ))}
 
-          {busCoordinates && (
+          {Object.entries(busCoordinates).map(([line, coordinates]) => (
             <Marker
-              longitude={busCoordinates.longitude}
-              latitude={busCoordinates.latitude}
+              key={line}
+              longitude={coordinates.longitude}
+              latitude={coordinates.latitude}
               anchor="center"
             >
               <span
                 className="busMarker"
                 role="img"
-                aria-label="Autocarro STCP da linha 204"
-                title="Autocarro STCP · linha 204"
+                aria-label={`Autocarro STCP da linha ${line}`}
+                title={`Autocarro STCP · linha ${line}`}
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M5 3h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2v1h-2v-1H7v1H5v-1a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v8h14V5H5Zm1 10a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm12 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
                 </svg>
               </span>
             </Marker>
-          )}
+          ))}
 
           {selectedStop && (
             <Popup
