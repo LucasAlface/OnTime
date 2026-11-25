@@ -25,9 +25,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'dd22bd0b89aae6137a5d75cb7ad2b44583279f97c2015d254ffa06395bcc548f'>;
+  StorageHashBase<'aa219e093ad7000bd07261e1409d161f84e9f8741e4fc2b7774b6892ce8456ec'>;
 export type ExecutionHash =
-  ExecutionHashBase<'9a5883a46a0f8f232598bc988951650620bebba27bb6d25c01513cb5e3fd94b9'>;
+  ExecutionHashBase<'0071f96a90cbdaa83701578241c0445f90dd824b9779305cb291fce092ef79a0'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -312,12 +312,29 @@ export type StorageColumnInputTypes = ColumnTypesFromStorage<
 >;
 
 export namespace Models {
+  export type public_Route = {
+    createdAt: FieldOutputTypes['public']['Route']['createdAt'];
+    line: FieldOutputTypes['public']['Route']['line'];
+    name: FieldOutputTypes['public']['Route']['name'];
+    sort_order: FieldOutputTypes['public']['Route']['sort_order'];
+    updatedAt: FieldOutputTypes['public']['Route']['updatedAt'];
+    readonly [RelationKeys]?: never;
+  };
   export type public_SpatialRefSys = {
     authName: FieldOutputTypes['public']['SpatialRefSys']['authName'];
     authSrid: FieldOutputTypes['public']['SpatialRefSys']['authSrid'];
     proj4text: FieldOutputTypes['public']['SpatialRefSys']['proj4text'];
     srid: FieldOutputTypes['public']['SpatialRefSys']['srid'];
     srtext: FieldOutputTypes['public']['SpatialRefSys']['srtext'];
+    readonly [RelationKeys]?: never;
+  };
+  export type public_Stop = {
+    code: FieldOutputTypes['public']['Stop']['code'];
+    createdAt: FieldOutputTypes['public']['Stop']['createdAt'];
+    lat: FieldOutputTypes['public']['Stop']['lat'];
+    lon: FieldOutputTypes['public']['Stop']['lon'];
+    name: FieldOutputTypes['public']['Stop']['name'];
+    updatedAt: FieldOutputTypes['public']['Stop']['updatedAt'];
     readonly [RelationKeys]?: never;
   };
   export type public_User = {
@@ -333,7 +350,9 @@ export namespace Models {
 
 export declare const models: {
   public: {
+    Route: Models.public_Route;
     SpatialRefSys: Models.public_SpatialRefSys;
+    Stop: Models.public_Stop;
     User: Models.public_User;
   };
 };
@@ -356,6 +375,49 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
+            readonly Route: {
+              columns: {
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly line: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly name: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly sort_order: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly updatedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+              };
+              uniques: readonly [
+                { readonly columns: readonly ['line'] },
+                { readonly columns: readonly ['sort_order'] },
+              ];
+              indexes: readonly [];
+              foreignKeys: readonly [];
+            };
             readonly spatial_ref_sys: {
               columns: {
                 readonly auth_name: {
@@ -397,6 +459,52 @@ type ContractBase = Omit<
                 readonly name: 'spatial_ref_sys_pkey';
               };
               uniques: readonly [];
+              indexes: readonly [];
+              foreignKeys: readonly [];
+            };
+            readonly Stop: {
+              columns: {
+                readonly code: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly lat: {
+                  readonly dataType: 'pg/float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly lon: {
+                  readonly dataType: 'pg/float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly name: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly updatedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+              };
+              uniques: readonly [{ readonly columns: readonly ['code'] }];
               indexes: readonly [];
               foreignKeys: readonly [];
             };
@@ -472,6 +580,8 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
+    readonly Route: { readonly namespace: 'public' & NamespaceId; readonly model: 'Route' };
+    readonly Stop: { readonly namespace: 'public' & NamespaceId; readonly model: 'Stop' };
     readonly User: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
     readonly spatial_ref_sys: {
       readonly namespace: 'public' & NamespaceId;
@@ -482,6 +592,50 @@ type ContractBase = Omit<
     readonly namespaces: {
       readonly public: {
         readonly models: {
+          readonly Route: {
+            readonly fields: {
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly line: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly name: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly sort_order: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+            };
+            readonly relations: Record<string, never>;
+            readonly storage: {
+              readonly table: 'Route';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly line: { readonly column: 'line' };
+                readonly name: { readonly column: 'name' };
+                readonly sort_order: { readonly column: 'sort_order' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
+              };
+            };
+          };
           readonly SpatialRefSys: {
             readonly fields: {
               readonly authName: {
@@ -527,6 +681,55 @@ type ContractBase = Omit<
                 readonly proj4text: { readonly column: 'proj4text' };
                 readonly srid: { readonly column: 'srid' };
                 readonly srtext: { readonly column: 'srtext' };
+              };
+            };
+          };
+          readonly Stop: {
+            readonly fields: {
+              readonly code: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly lat: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly lon: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly name: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+            };
+            readonly relations: Record<string, never>;
+            readonly storage: {
+              readonly table: 'Stop';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly code: { readonly column: 'code' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly lat: { readonly column: 'lat' };
+                readonly lon: { readonly column: 'lon' };
+                readonly name: { readonly column: 'name' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
               };
             };
           };
@@ -642,6 +845,64 @@ type ContractBase = Omit<
     readonly executionHash: ExecutionHash;
     readonly mutations: {
       readonly defaults: readonly [
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'Route';
+            readonly field: 'createdAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly onUpdate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'Route';
+            readonly field: 'updatedAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'Stop';
+            readonly field: 'createdAt';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly onUpdate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'Stop';
+            readonly field: 'updatedAt';
+            readonly namespace: 'public';
+          };
+        },
         {
           readonly onCreate: {
             readonly id: 'timestampNow';

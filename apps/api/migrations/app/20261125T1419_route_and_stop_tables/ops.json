@@ -1,0 +1,244 @@
+[
+  {
+    "id": "table.Route",
+    "label": "Create table \"Route\"",
+    "summary": "Creates table \"Route\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Route"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Route\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Route\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Route\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Route\"",
+        "sql": "CREATE TABLE \"public\".\"Route\" (\n  \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"line\" text NOT NULL,\n  \"name\" text,\n  \"sort_order\" int4 NOT NULL,\n  \"updatedAt\" timestamptz(3) NOT NULL\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Route\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Route\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Route\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.Stop",
+    "label": "Create table \"Stop\"",
+    "summary": "Creates table \"Stop\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Stop"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Stop\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Stop\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Stop\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Stop\"",
+        "sql": "CREATE TABLE \"public\".\"Stop\" (\n  \"code\" text NOT NULL,\n  \"createdAt\" timestamptz(3) DEFAULT (now()) NOT NULL,\n  \"lat\" float8 NOT NULL,\n  \"lon\" float8 NOT NULL,\n  \"name\" text NOT NULL,\n  \"updatedAt\" timestamptz(3) NOT NULL\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Stop\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Stop\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Stop\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "unique.Route.Route_line_key",
+    "label": "Add unique constraint on \"Route\" (line)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Route_line_key",
+        "table": "Route"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Route_line_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Route_line_key",
+          "public",
+          "\"public\".\"Route\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"Route_line_key\" on \"Route\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Route_line_key\"",
+        "sql": "ALTER TABLE \"public\".\"Route\" ADD CONSTRAINT \"Route_line_key\" UNIQUE (\"line\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"Route_line_key\" exists on (line)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "Route_line_key",
+          "public",
+          "\"public\".\"Route\"",
+          "u",
+          "[\"line\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Route.Route_sort_order_key",
+    "label": "Add unique constraint on \"Route\" (sort_order)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Route_sort_order_key",
+        "table": "Route"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Route_sort_order_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Route_sort_order_key",
+          "public",
+          "\"public\".\"Route\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"Route_sort_order_key\" on \"Route\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Route_sort_order_key\"",
+        "sql": "ALTER TABLE \"public\".\"Route\" ADD CONSTRAINT \"Route_sort_order_key\" UNIQUE (\"sort_order\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"Route_sort_order_key\" exists on (sort_order)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "Route_sort_order_key",
+          "public",
+          "\"public\".\"Route\"",
+          "u",
+          "[\"sort_order\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Stop.Stop_code_key",
+    "label": "Add unique constraint on \"Stop\" (code)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Stop_code_key",
+        "table": "Stop"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Stop_code_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Stop_code_key",
+          "public",
+          "\"public\".\"Stop\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"Stop_code_key\" on \"Stop\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Stop_code_key\"",
+        "sql": "ALTER TABLE \"public\".\"Stop\" ADD CONSTRAINT \"Stop_code_key\" UNIQUE (\"code\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"Stop_code_key\" exists on (code)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "Stop_code_key",
+          "public",
+          "\"public\".\"Stop\"",
+          "u",
+          "[\"code\"]"
+        ]
+      }
+    ]
+  }
+]

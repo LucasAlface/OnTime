@@ -33,3 +33,20 @@ model User {
   createdAt    DateTime           @default(now()) @onCreate(now())
   updatedAt    temporal.UpdatedAt
 }
+
+model Route {
+  line         String             @unique
+  name         String?
+  sort_order   Int                @unique
+  createdAt    DateTime           @default(now()) @onCreate(now())
+  updatedAt    temporal.UpdatedAt  
+}
+
+model Stop {
+  code         String             @unique
+  name         String             
+  lon          Float
+  lat          Float
+  createdAt    DateTime           @default(now()) @onCreate(now())
+  updatedAt    temporal.UpdatedAt
+}
