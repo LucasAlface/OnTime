@@ -802,6 +802,23 @@ input {
   white-space: nowrap;
 }
 
+.stcp-map-page .busMarker {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #00a58e;
+  box-shadow: 0 3px 10px rgb(9 45 63 / 35%);
+}
+
+.stcp-map-page .busMarker svg {
+  width: 19px;
+  height: 19px;
+  fill: #fff;
+}
+
 .stcp-map-page .popupCoordinates {
   display: block;
   margin-top: 4px;
