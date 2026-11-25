@@ -10,13 +10,23 @@ async function get204() {
 export async function getCoordinates(
     onUpdate: (coordinates: any[]) => void
 ) {
-    while (true){
-        await new Promise(resolve => setTimeout(resolve, 30*1000)); // 30 segundos
+    let lastCoordinates: string | undefined;
+
+    while (true) {
+        const requestStartedAt = Date.now();
         const entities = await get204();
         let coordinates: any[] = [];
         entities.forEach((bus: { location: { value: { coordinates: any; }; }; }) => {
             coordinates.push(bus.location.value.coordinates);
         });
-        onUpdate(coordinates);        
+
+        const serializedCoordinates = JSON.stringify(coordinates);
+        if (serializedCoordinates !== lastCoordinates) {
+            onUpdate(coordinates);
+            lastCoordinates = serializedCoordinates;
+        }
+
+        const elapsed = Date.now() - requestStartedAt;
+        await new Promise(resolve => setTimeout(resolve, Math.max(0, 1000 - elapsed)));
     }
 }
