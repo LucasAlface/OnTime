@@ -68,19 +68,24 @@ export default function Map() {
   const [routeDuration, setRouteDuration] = useState(null);
   const [routeStatus, setRouteStatus] = useState("loading");
   const [selectedStop, setSelectedStop] = useState(null);
+  const [selectedBus, setSelectedBus] = useState(null);
   const [busCoordinates, setBusCoordinates] = useState({});
 
   useEffect(() => {
     ROUTES.forEach(({ line }) => {
-      getCoordinates((coordinates) => {
-        const [longitude, latitude] = coordinates[0] ?? [];
+      getCoordinates((buses) => {
+        setBusCoordinates((current) => {
+          const next = { ...current };
 
-        if (Number.isFinite(longitude) && Number.isFinite(latitude)) {
-          setBusCoordinates((current) => ({
-            ...current,
-            [line]: { longitude, latitude },
-          }));
-        }
+          for (const bus of buses) {
+            const [longitude, latitude] = bus.coordinates;
+            if (Number.isFinite(longitude) && Number.isFinite(latitude)) {
+              next[bus.id] = { ...bus, longitude, latitude };
+            }
+          }
+
+          return next;
+        });
       }, line).catch((error) => {
         console.error(`Failed to update bus location for route ${line}:`, error);
       });
@@ -174,25 +179,54 @@ export default function Map() {
             </Marker>
           ))}
 
-          {Object.entries(busCoordinates).map(([line, coordinates]) => (
-            <Marker
-              key={line}
-              longitude={coordinates.longitude}
-              latitude={coordinates.latitude}
-              anchor="center"
-            >
-              <span
-                className="busMarker"
-                role="img"
-                aria-label={`Autocarro STCP da linha ${line}`}
-                title={`Autocarro STCP · linha ${line}`}
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M5 3h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2v1h-2v-1H7v1H5v-1a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v8h14V5H5Zm1 10a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm12 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
-                </svg>
-              </span>
-            </Marker>
+          {Object.values(busCoordinates).map((bus) => (
+            (() => {
+              const routeName = ROUTES.find((item) => String(item.line) === bus.line)?.name;
+              const displayRouteName = bus.sentido === "1" && routeName?.includes("-")
+                ? routeName.split("-").map((part) => part.trim()).reverse().join(" - ")
+                : routeName;
+
+              return (
+                <Marker
+                  key={bus.id}
+                  longitude={bus.longitude}
+                  latitude={bus.latitude}
+                  anchor="center"
+                >
+                  <button
+                    type="button"
+                    className="busMarker"
+                    aria-label={`Ver linha ${displayRouteName ?? bus.line}`}
+                    title={displayRouteName ?? `Linha ${bus.line}`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setSelectedBus({ ...bus, displayRouteName });
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M5 3h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2v1h-2v-1H7v1H5v-1a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 2v8h14V5H5Zm1 10a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Zm12 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+                    </svg>
+                  </button>
+                </Marker>
+              );
+            })()
           ))}
+
+          {selectedBus && (
+            <Popup
+              longitude={selectedBus.longitude}
+              latitude={selectedBus.latitude}
+              offset={20}
+              closeButton
+              closeOnClick={false}
+              onClose={() => setSelectedBus(null)}
+            >
+              <strong>{selectedBus.line}</strong>
+              {selectedBus.displayRouteName && (
+                <span className="popupCoordinates">{selectedBus.displayRouteName}</span>
+              )}
+            </Popup>
+          )}
 
           {selectedStop && (
             <Popup
