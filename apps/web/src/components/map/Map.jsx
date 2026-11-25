@@ -2,53 +2,16 @@
 
 import { useEffect, useState } from "react";
 import {
-  Layer,
   Map as MapLibreMap,
   Marker,
   NavigationControl,
   Popup,
   ScaleControl,
-  Source,
 } from "@vis.gl/react-maplibre";
 import { getCoordinates, getRoutes } from "@/services/location/Tracker";
-
-const STOPS = [
-  { id: "aliados", name: "Aliados", latitude: 41.148944, longitude: -8.611278 },
-  {
-    id: "galiza",
-    name: "Pr. da Galiza",
-    latitude: 41.153444,
-    longitude: -8.626333,
-  },
-  {
-    id: "casa-da-musica",
-    name: "Casa da Música",
-    latitude: 41.15895,
-    longitude: -8.62942,
-  },
-  {
-    id: "fonte-da-moura",
-    name: "Fonte da Moura",
-    latitude: 41.171022,
-    longitude: -8.657982,
-  },
-  { id: "viso", name: "Viso", latitude: 41.17784, longitude: -8.64228 },
-];
+import { getStops } from "@/components/stops/GetStops";
 
 const ROUTES = await getRoutes();
-
-const APPROXIMATE_ROUTE = {
-  type: "Feature",
-  properties: {},
-  geometry: {
-    type: "LineString",
-    coordinates: STOPS.map(({ longitude, latitude }) => [longitude, latitude]),
-  },
-};
-
-const ROUTE_URL = `https://router.project-osrm.org/route/v1/driving/${STOPS.map(
-  ({ longitude, latitude }) => `${longitude},${latitude}`,
-).join(";")}?overview=full&geometries=geojson&steps=false`;
 
 const MAP_STYLE = {
   version: 8,
@@ -64,12 +27,16 @@ const MAP_STYLE = {
 };
 
 export default function Map() {
-  const [route, setRoute] = useState(APPROXIMATE_ROUTE);
-  const [routeDuration, setRouteDuration] = useState(null);
-  const [routeStatus, setRouteStatus] = useState("loading");
+  const [stops, setStops] = useState([]);
   const [selectedStop, setSelectedStop] = useState(null);
   const [selectedBus, setSelectedBus] = useState(null);
   const [busCoordinates, setBusCoordinates] = useState({});
+
+  useEffect(() => {
+    getStops()
+      .then((databaseStops) => setStops(databaseStops))
+      .catch((error) => console.error("Failed to load stops:", error));
+  }, []);
 
   useEffect(() => {
     ROUTES.forEach(({ line }) => {
@@ -93,43 +60,6 @@ export default function Map() {
   }, []);
     
 
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadFastestRoute() {
-      try {
-        const response = await fetch(ROUTE_URL, { signal: controller.signal });
-        if (!response.ok) throw new Error("Route request failed");
-
-        const result = await response.json();
-        const fastestRoute = result.routes?.[0];
-        if (!fastestRoute?.geometry?.coordinates?.length) {
-          throw new Error("No route was returned");
-        }
-
-        setRoute({
-          type: "Feature",
-          properties: {},
-          geometry: fastestRoute.geometry,
-        });
-        setRouteDuration(Math.round(fastestRoute.duration / 60));
-        setRouteStatus("ready");
-      } catch {
-        if (!controller.signal.aborted) setRouteStatus("approximate");
-      }
-    }
-
-    loadFastestRoute();
-    return () => controller.abort();
-  }, []);
-
-  const routeMessage =
-    routeStatus === "loading"
-      ? "A calcular o percurso mais rápido…"
-      : routeStatus === "approximate"
-        ? "Percurso aproximado · serviço de direções indisponível"
-        : "Percurso rodoviário mais rápido";
-
   return (
     <main className="stcp-map-page">
       <div className="mapCanvas">
@@ -142,26 +72,11 @@ export default function Map() {
           <NavigationControl position="top-right" showCompass />
           <ScaleControl position="bottom-right" />
 
-          <Source id="fastest-route" type="geojson" data={route}>
-            <Layer
-              id="fastest-route-outline"
-              type="line"
-              layout={{ "line-cap": "round", "line-join": "round" }}
-              paint={{ "line-color": "#ffffff", "line-width": 10, "line-opacity": 0.9 }}
-            />
-            <Layer
-              id="fastest-route-line"
-              type="line"
-              layout={{ "line-cap": "round", "line-join": "round" }}
-              paint={{ "line-color": "#1976e9", "line-width": 5, "line-opacity": 0.98 }}
-            />
-          </Source>
-
-          {STOPS.map((stop, index) => (
+          {stops.map((stop) => (
             <Marker
-              key={stop.id}
-              longitude={stop.longitude}
-              latitude={stop.latitude}
+              key={stop.code}
+              longitude={Number(stop.lon)}
+              latitude={Number(stop.lat)}
               anchor="bottom"
             >
               <button
@@ -173,7 +88,7 @@ export default function Map() {
                   setSelectedStop(stop);
                 }}
               >
-                <span className="stopPin">{index + 1}</span>
+                <span className="stopPin"></span>
                 <span className="stopLabel">{stop.name}</span>
               </button>
             </Marker>
@@ -230,65 +145,19 @@ export default function Map() {
 
           {selectedStop && (
             <Popup
-              longitude={selectedStop.longitude}
-              latitude={selectedStop.latitude}
+              longitude={Number(selectedStop.lon)}
+              latitude={Number(selectedStop.lat)}
               offset={32}
               closeButton
               closeOnClick={false}
               onClose={() => setSelectedStop(null)}
             >
               <strong>{selectedStop.name}</strong>
-              <span className="popupCoordinates">
-                {selectedStop.latitude.toFixed(6)}, {selectedStop.longitude.toFixed(6)}
-              </span>
+              <p className="popupStopCode">{selectedStop.code}</p>
             </Popup>
           )}
         </MapLibreMap>
       </div>
-
-      <section className="infoPanel" aria-label="Informação do mapa STCP">
-        <header className="header">
-          <a className="brand" href="/" aria-label="OnTime — início">
-            <span className="brandMark" aria-hidden="true">
-              <span />
-            </span>
-            <span>OnTime</span>
-          </a>
-          <span className="cityTag">PORTO, PORTUGAL</span>
-        </header>
-
-        <div className="intro">
-          <p className="eyebrow">REDE STCP</p>
-          <h1>Porto em movimento</h1>
-          <p className="description">Paragens e percurso numa só vista.</p>
-        </div>
-
-        <div className="routeCard">
-          <div className="routeHeading">
-            <span className="routeIcon" aria-hidden="true" />
-            <div>
-              <strong>Percurso mais rápido</strong>
-              <small>{routeMessage}</small>
-            </div>
-            {routeDuration !== null && routeStatus === "ready" && (
-              <span className="duration">{routeDuration} min</span>
-            )}
-          </div>
-          <div className="routeLegend">
-            <span className="routeSwatch" />
-            <span>Entre as 5 paragens · estrada</span>
-          </div>
-        </div>
-
-        <ol className="stopList">
-          {STOPS.map((stop, index) => (
-            <li key={stop.id}>
-              <span className="listIndex">{String(index + 1).padStart(2, "0")}</span>
-              <span>{stop.name}</span>
-            </li>
-          ))}
-        </ol>
-      </section>
     </main>
   );
 }

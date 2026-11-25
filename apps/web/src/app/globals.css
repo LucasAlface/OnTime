@@ -826,6 +826,12 @@ input {
   font-size: 10px;
 }
 
+.stcp-map-page .popupStopCode {
+  margin: 4px 0 0;
+  color: #728791;
+  font-size: 10px;
+}
+
 .stcp-map-page .maplibregl-popup-content {
   padding: 12px 14px;
   border-radius: 7px;
