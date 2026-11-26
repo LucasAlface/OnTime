@@ -7,13 +7,21 @@ import {
   NavigationControl,
   Popup,
   ScaleControl,
+  Source,
+  Layer,
 } from "@vis.gl/react-maplibre";
 import { getCoordinates } from "@/services/location/Tracker";
 import { getStops } from "@/components/stops/GetStops";
 import RouteSidebar from "./RouteSidebar";
 
+const MAPLIBRE_WORKER_URL = new URL(
+  "maplibre-gl/dist/maplibre-gl-worker.mjs",
+  import.meta.url,
+).toString();
+
 const MAP_STYLE = {
   version: 8,
+  glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
   sources: {
     openstreetmap: {
       type: "raster",
@@ -25,6 +33,8 @@ const MAP_STYLE = {
   layers: [{ id: "openstreetmap", type: "raster", source: "openstreetmap" }],
 };
 
+
+
 export default function Map() {
   const [stops, setStops] = useState([]);
   const [routes, setRoutes] = useState([]);
@@ -32,6 +42,19 @@ export default function Map() {
   const [selectedStop, setSelectedStop] = useState(null);
   const [selectedBus, setSelectedBus] = useState(null);
   const [busCoordinates, setBusCoordinates] = useState({});
+  const [mapZoom, setMapZoom] = useState(12.8);
+
+  const stopFeatures = {
+    type: "FeatureCollection",
+    features: stops.map((stop) => ({
+      type: "Feature",
+      properties: { code: stop.code, name: stop.name },
+      geometry: {
+        type: "Point",
+        coordinates: [Number(stop.lon), Number(stop.lat)],
+      },
+    })),
+  };
 
   const handleRoutesLoaded = useCallback((loadedRoutes) => {
     setRoutes(loadedRoutes);
@@ -58,6 +81,33 @@ export default function Map() {
 
   const getSelectedRoutes = () =>
     routes.filter((route) => selectedRoutes.includes(String(route.line)));
+
+  const handleStopMapClick = (event) => {
+    const feature = event.features?.[0];
+    if (!feature) return;
+
+    if (feature.properties?.cluster_id !== undefined) {
+      const source = event.target.getSource("stops-clustered");
+      if (!source) return;
+
+      source
+        .getClusterExpansionZoom(Number(feature.properties.cluster_id))
+        .then((zoom) => {
+          event.target.easeTo({
+            center: feature.geometry.coordinates,
+            zoom,
+            duration: 650,
+          });
+        })
+        .catch((error) => {
+          console.error("Failed to expand stop cluster:", error);
+        });
+      return;
+    }
+
+    const stop = stops.find((item) => item.code === feature.properties?.code);
+    if (stop) setSelectedStop(stop);
+  };
 
   useEffect(() => {
     const activeRoutes = getSelectedRoutes();
@@ -105,32 +155,84 @@ export default function Map() {
         <MapLibreMap
           initialViewState={{ longitude: -8.632, latitude: 41.163, zoom: 12.8 }}
           mapStyle={MAP_STYLE}
+          workerUrl={MAPLIBRE_WORKER_URL}
           attributionControl
+          interactiveLayerIds={["stop-clusters", "stop-points", "stop-labels"]}
+          onClick={handleStopMapClick}
+          onMoveEnd={(event) => setMapZoom(event.viewState.zoom)}
           style={{ width: "100%", height: "100%" }}
         >
           <NavigationControl position="top-right" showCompass />
           <ScaleControl position="bottom-right" />
 
-          {stops.map((stop) => (
-            <Marker
-              key={stop.code}
-              longitude={Number(stop.lon)}
-              latitude={Number(stop.lat)}
-              anchor="bottom"
-            >
-              <button
-                type="button"
-                className="stopMarker"
-                aria-label={`Ver paragem ${stop.name}`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setSelectedStop(stop);
-                }}
-              >
-                <span className="stopPin"></span>
-              </button>
-            </Marker>
-          ))}
+          <Source
+            id="stops-clustered"
+            type="geojson"
+            data={stopFeatures}
+            cluster
+            clusterMaxZoom={14}
+            clusterRadius={48}
+          >
+            <Layer
+  id="stop-clusters"
+  type="circle"
+  filter={["has", "point_count"]}
+  paint={{
+    "circle-color": "#075b7d",
+    "circle-radius": [
+      "step",
+      ["get", "point_count"],
+      16,
+      20, 20,
+      100, 25,
+    ],
+    "circle-stroke-color": "#ffffff",
+    "circle-stroke-width": 3,
+  }}
+/>
+
+<Layer
+  id="stop-cluster-count"
+  type="symbol"
+  filter={["has", "point_count"]}
+  layout={{
+    "text-field": ["get", "point_count_abbreviated"],
+    "text-size": 12,
+  }}
+  paint={{
+    "text-color": "#ffffff",
+  }}
+/>
+
+<Layer
+  id="stop-points"
+  type="circle"
+  filter={["!", ["has", "point_count"]]}
+  paint={{
+    "circle-color": "#075b7d",
+    "circle-radius": 9,
+    "circle-stroke-color": "#ffffff",
+    "circle-stroke-width": 3,
+  }}
+/>
+
+<Layer
+  id="stop-labels"
+  type="symbol"
+  filter={["!", ["has", "point_count"]]}
+  layout={{
+    "text-field": ["get", "name"],
+    "text-size": 11,
+    "text-offset": [0, 1.5],
+    "text-anchor": "top",
+  }}
+  paint={{
+    "text-color": "#163f53",
+    "text-halo-color": "#ffffff",
+    "text-halo-width": 1.5,
+  }}
+/>
+          </Source>
 
           {Object.values(busCoordinates).map((bus) => (
             (() => {
