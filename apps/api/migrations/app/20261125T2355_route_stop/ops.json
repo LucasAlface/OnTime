@@ -1,0 +1,251 @@
+[
+  {
+    "id": "table.RouteStop",
+    "label": "Create table \"RouteStop\"",
+    "summary": "Creates table \"RouteStop\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "RouteStop"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"RouteStop\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RouteStop\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"RouteStop\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"RouteStop\"",
+        "sql": "CREATE TABLE \"public\".\"RouteStop\" (\n  \"routeLine\" text NOT NULL,\n  \"stopCode\" text NOT NULL,\n  PRIMARY KEY (\"routeLine\", \"stopCode\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"RouteStop\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"RouteStop\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"RouteStop\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "index.RouteStop.RouteStop_routeLine_idx_3ce36778",
+    "label": "Create index \"RouteStop_routeLine_idx_3ce36778\" on \"RouteStop\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "RouteStop_routeLine_idx_3ce36778",
+        "table": "RouteStop"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"RouteStop_routeLine_idx_3ce36778\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RouteStop_routeLine_idx_3ce36778\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"RouteStop_routeLine_idx_3ce36778\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"RouteStop_routeLine_idx_3ce36778\"",
+        "sql": "CREATE INDEX \"RouteStop_routeLine_idx_3ce36778\" ON \"public\".\"RouteStop\" (\"routeLine\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"RouteStop_routeLine_idx_3ce36778\" exists on \"RouteStop\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"RouteStop_routeLine_idx_3ce36778\"",
+          "i",
+          "I",
+          "\"public\".\"RouteStop\"",
+          "btree",
+          "[\"routeLine\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.RouteStop.RouteStop_stopCode_idx_beae5384",
+    "label": "Create index \"RouteStop_stopCode_idx_beae5384\" on \"RouteStop\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "RouteStop_stopCode_idx_beae5384",
+        "table": "RouteStop"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"RouteStop_stopCode_idx_beae5384\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"RouteStop_stopCode_idx_beae5384\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"RouteStop_stopCode_idx_beae5384\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"RouteStop_stopCode_idx_beae5384\"",
+        "sql": "CREATE INDEX \"RouteStop_stopCode_idx_beae5384\" ON \"public\".\"RouteStop\" (\"stopCode\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"RouteStop_stopCode_idx_beae5384\" exists on \"RouteStop\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"RouteStop_stopCode_idx_beae5384\"",
+          "i",
+          "I",
+          "\"public\".\"RouteStop\"",
+          "btree",
+          "[\"stopCode\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.RouteStop.RouteStop_routeLine_fkey",
+    "label": "Add foreign key \"RouteStop_routeLine_fkey\" on \"RouteStop\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "RouteStop_routeLine_fkey",
+        "table": "RouteStop"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"RouteStop_routeLine_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RouteStop_routeLine_fkey",
+          "public",
+          "\"public\".\"RouteStop\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"RouteStop_routeLine_fkey\" on \"RouteStop\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"RouteStop_routeLine_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"RouteStop\"\nADD CONSTRAINT \"RouteStop_routeLine_fkey\"\nFOREIGN KEY (\"routeLine\")\nREFERENCES \"public\".\"Route\" (\"line\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"RouteStop_routeLine_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "RouteStop_routeLine_fkey",
+          "public",
+          "\"public\".\"RouteStop\"",
+          "f",
+          "[\"routeLine\"]",
+          "\"public\".\"Route\"",
+          "[\"line\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.RouteStop.RouteStop_stopCode_fkey",
+    "label": "Add foreign key \"RouteStop_stopCode_fkey\" on \"RouteStop\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "RouteStop_stopCode_fkey",
+        "table": "RouteStop"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"RouteStop_stopCode_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "RouteStop_stopCode_fkey",
+          "public",
+          "\"public\".\"RouteStop\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"RouteStop_stopCode_fkey\" on \"RouteStop\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"RouteStop_stopCode_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"RouteStop\"\nADD CONSTRAINT \"RouteStop_stopCode_fkey\"\nFOREIGN KEY (\"stopCode\")\nREFERENCES \"public\".\"Stop\" (\"code\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"RouteStop_stopCode_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "RouteStop_stopCode_fkey",
+          "public",
+          "\"public\".\"RouteStop\"",
+          "f",
+          "[\"stopCode\"]",
+          "\"public\".\"Stop\"",
+          "[\"code\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  }
+]

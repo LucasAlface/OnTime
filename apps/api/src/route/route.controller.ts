@@ -13,11 +13,8 @@ export class RouteController {
   }
 
   @Post("create")
-  async createRoute(
-    @Body() body: RouteRequest
-  ) {
-    const route = await this.routeService.createRoute(body.line, body.name, body.sort_order);
-    return route;
+  async createRoute(@Body() body: RouteRequest | RouteRequest[]) {
+    return this.routeService.createRoute(body);
   }
 
   @Post("update/:line")

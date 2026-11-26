@@ -38,6 +38,7 @@ model Route {
   line         String             @unique
   name         String?
   sort_order   Int                @unique
+  stops        RouteStops[]
   createdAt    DateTime           @default(now()) @onCreate(now())
   updatedAt    temporal.UpdatedAt  
 }
@@ -47,6 +48,17 @@ model Stop {
   name         String             
   lon          Float
   lat          Float
+  routes       RouteStop[]
   createdAt    DateTime           @default(now()) @onCreate(now())
   updatedAt    temporal.UpdatedAt
+}
+
+model RouteStop {
+  routeLine String
+  stopCode  String
+
+  route Route @relation(fields: [routeLine], references: [line], onDelete: Cascade)
+  stop  Stop  @relation(fields: [stopCode], references: [code], onDelete: Cascade)
+
+  @@id([routeLine, stopCode])
 }

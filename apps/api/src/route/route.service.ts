@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
+import type { RouteRequest } from './route.interfaces.js';
 
 @Injectable()
 export class RouteService {
@@ -13,15 +14,18 @@ export class RouteService {
     return routes;
   }
 
-  async createRoute(line: string, name: string, sort_order: number) {
-    const route = await this.prisma.db.orm.public.Route
-      .create({
-        line,
-        name,
-        sort_order,
-      });
+  async createRoute(routes: RouteRequest | RouteRequest[]) {
+    if (!Array.isArray(routes)) {
+      return this.prisma.db.orm.public.Route.create(routes);
+    }
 
-    return route;
+    return this.prisma.db.transaction(async (tx) => {
+      const createdRoutes = [];
+      for (const route of routes) {
+        createdRoutes.push(await tx.orm.public.Route.create(route));
+      }
+      return createdRoutes;
+    });
   }
 
   async updateRoute(lineToUpdate: string,line: string, name: string, sort_order: number) {

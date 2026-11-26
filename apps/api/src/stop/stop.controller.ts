@@ -12,8 +12,8 @@ export class StopController {
   }
 
   @Post('create')
-  async createStop(@Body() body: StopRequest) {
-    return this.stopService.createStop(body.code, body.name, body.lon, body.lat);
+  async createStop(@Body() body: StopRequest | StopRequest[]) {
+    return this.stopService.createStop(body);
   }
 
   @Post('update/:code')

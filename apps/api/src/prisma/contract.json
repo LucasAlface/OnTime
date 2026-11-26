@@ -8,6 +8,10 @@
       "model": "Route",
       "namespace": "public"
     },
+    "RouteStop": {
+      "model": "RouteStop",
+      "namespace": "public"
+    },
     "Stop": {
       "model": "Stop",
       "namespace": "public"
@@ -69,7 +73,23 @@
                 }
               }
             },
-            "relations": {},
+            "relations": {
+              "stops": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "line"
+                  ],
+                  "targetFields": [
+                    "routeLine"
+                  ]
+                },
+                "to": {
+                  "model": "RouteStop",
+                  "namespace": "public"
+                }
+              }
+            },
             "storage": {
               "fields": {
                 "createdAt": {
@@ -90,6 +110,70 @@
               },
               "namespaceId": "public",
               "table": "Route"
+            }
+          },
+          "RouteStop": {
+            "fields": {
+              "routeLine": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "stopCode": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "route": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "routeLine"
+                  ],
+                  "targetFields": [
+                    "line"
+                  ]
+                },
+                "to": {
+                  "model": "Route",
+                  "namespace": "public"
+                }
+              },
+              "stop": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "stopCode"
+                  ],
+                  "targetFields": [
+                    "code"
+                  ]
+                },
+                "to": {
+                  "model": "Stop",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "routeLine": {
+                  "column": "routeLine"
+                },
+                "stopCode": {
+                  "column": "stopCode"
+                }
+              },
+              "namespaceId": "public",
+              "table": "RouteStop"
             }
           },
           "SpatialRefSys": {
@@ -213,7 +297,23 @@
                 }
               }
             },
-            "relations": {},
+            "relations": {
+              "routes": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "code"
+                  ],
+                  "targetFields": [
+                    "stopCode"
+                  ]
+                },
+                "to": {
+                  "model": "RouteStop",
+                  "namespace": "public"
+                }
+              }
+            },
             "storage": {
               "fields": {
                 "code": {
@@ -383,6 +483,87 @@
                   ]
                 }
               ]
+            },
+            "RouteStop": {
+              "columns": {
+                "routeLine": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "stopCode": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "index": {
+                    "name": "RouteStop_routeLine_idx_3ce36778"
+                  },
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "routeLine"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "RouteStop"
+                  },
+                  "target": {
+                    "columns": [
+                      "line"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Route"
+                  }
+                },
+                {
+                  "index": {
+                    "name": "RouteStop_stopCode_idx_beae5384"
+                  },
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "stopCode"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "RouteStop"
+                  },
+                  "target": {
+                    "columns": [
+                      "code"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Stop"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "routeLine"
+                  ],
+                  "name": "RouteStop_routeLine_idx_3ce36778",
+                  "prefix": "RouteStop_routeLine_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "stopCode"
+                  ],
+                  "name": "RouteStop_stopCode_idx_beae5384",
+                  "prefix": "RouteStop_stopCode_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "routeLine",
+                  "stopCode"
+                ]
+              },
+              "uniques": []
             },
             "Stop": {
               "columns": {
@@ -584,7 +765,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "aa219e093ad7000bd07261e1409d161f84e9f8741e4fc2b7774b6892ce8456ec"
+    "storageHash": "a33ea7e7020b20354710208634465d84695e481585baf487d5d92de920fcba4f"
   },
   "execution": {
     "executionHash": "0071f96a90cbdaa83701578241c0445f90dd824b9779305cb291fce092ef79a0",

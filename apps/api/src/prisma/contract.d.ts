@@ -25,7 +25,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'aa219e093ad7000bd07261e1409d161f84e9f8741e4fc2b7774b6892ce8456ec'>;
+  StorageHashBase<'a33ea7e7020b20354710208634465d84695e481585baf487d5d92de920fcba4f'>;
 export type ExecutionHash =
   ExecutionHashBase<'0071f96a90cbdaa83701578241c0445f90dd824b9779305cb291fce092ef79a0'>;
 export type ProfileHash =
@@ -318,7 +318,15 @@ export namespace Models {
     name: FieldOutputTypes['public']['Route']['name'];
     sort_order: FieldOutputTypes['public']['Route']['sort_order'];
     updatedAt: FieldOutputTypes['public']['Route']['updatedAt'];
-    readonly [RelationKeys]?: never;
+    stops: public_RouteStop[];
+    readonly [RelationKeys]?: 'stops';
+  };
+  export type public_RouteStop = {
+    routeLine: FieldOutputTypes['public']['RouteStop']['routeLine'];
+    stopCode: FieldOutputTypes['public']['RouteStop']['stopCode'];
+    route: public_Route;
+    stop: public_Stop;
+    readonly [RelationKeys]?: 'route' | 'stop';
   };
   export type public_SpatialRefSys = {
     authName: FieldOutputTypes['public']['SpatialRefSys']['authName'];
@@ -335,7 +343,8 @@ export namespace Models {
     lon: FieldOutputTypes['public']['Stop']['lon'];
     name: FieldOutputTypes['public']['Stop']['name'];
     updatedAt: FieldOutputTypes['public']['Stop']['updatedAt'];
-    readonly [RelationKeys]?: never;
+    routes: public_RouteStop[];
+    readonly [RelationKeys]?: 'routes';
   };
   export type public_User = {
     createdAt: FieldOutputTypes['public']['User']['createdAt'];
@@ -351,6 +360,7 @@ export namespace Models {
 export declare const models: {
   public: {
     Route: Models.public_Route;
+    RouteStop: Models.public_RouteStop;
     SpatialRefSys: Models.public_SpatialRefSys;
     Stop: Models.public_Stop;
     User: Models.public_User;
@@ -417,6 +427,64 @@ type ContractBase = Omit<
               ];
               indexes: readonly [];
               foreignKeys: readonly [];
+            };
+            readonly RouteStop: {
+              columns: {
+                readonly routeLine: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly stopCode: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['routeLine', 'stopCode'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'RouteStop_routeLine_idx_3ce36778';
+                  readonly prefix: 'RouteStop_routeLine_idx';
+                  readonly columns: readonly ['routeLine'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'RouteStop_stopCode_idx_beae5384';
+                  readonly prefix: 'RouteStop_stopCode_idx';
+                  readonly columns: readonly ['stopCode'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'RouteStop';
+                    readonly columns: readonly ['routeLine'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Route';
+                    readonly columns: readonly ['line'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'RouteStop';
+                    readonly columns: readonly ['stopCode'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Stop';
+                    readonly columns: readonly ['code'];
+                  };
+                },
+              ];
             };
             readonly spatial_ref_sys: {
               columns: {
@@ -581,6 +649,7 @@ type ContractBase = Omit<
   readonly targetFamily: 'sql';
   readonly roots: {
     readonly Route: { readonly namespace: 'public' & NamespaceId; readonly model: 'Route' };
+    readonly RouteStop: { readonly namespace: 'public' & NamespaceId; readonly model: 'RouteStop' };
     readonly Stop: { readonly namespace: 'public' & NamespaceId; readonly model: 'Stop' };
     readonly User: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
     readonly spatial_ref_sys: {
@@ -623,7 +692,19 @@ type ContractBase = Omit<
                 };
               };
             };
-            readonly relations: Record<string, never>;
+            readonly relations: {
+              readonly stops: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'RouteStop';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['line'];
+                  readonly targetFields: readonly ['routeLine'];
+                };
+              };
+            };
             readonly storage: {
               readonly table: 'Route';
               readonly namespaceId: 'public';
@@ -633,6 +714,49 @@ type ContractBase = Omit<
                 readonly name: { readonly column: 'name' };
                 readonly sort_order: { readonly column: 'sort_order' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
+              };
+            };
+          };
+          readonly RouteStop: {
+            readonly fields: {
+              readonly routeLine: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly stopCode: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+            };
+            readonly relations: {
+              readonly route: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Route';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['routeLine'];
+                  readonly targetFields: readonly ['line'];
+                };
+              };
+              readonly stop: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'Stop' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['stopCode'];
+                  readonly targetFields: readonly ['code'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'RouteStop';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly routeLine: { readonly column: 'routeLine' };
+                readonly stopCode: { readonly column: 'stopCode' };
               };
             };
           };
@@ -719,7 +843,19 @@ type ContractBase = Omit<
                 };
               };
             };
-            readonly relations: Record<string, never>;
+            readonly relations: {
+              readonly routes: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'RouteStop';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['code'];
+                  readonly targetFields: readonly ['stopCode'];
+                };
+              };
+            };
             readonly storage: {
               readonly table: 'Stop';
               readonly namespaceId: 'public';
