@@ -38,7 +38,7 @@ model Route {
   line         String             @unique
   name         String?
   sort_order   Int                @unique
-  stops        RouteStops[]
+  stops        RouteStop[]
   createdAt    DateTime           @default(now()) @onCreate(now())
   updatedAt    temporal.UpdatedAt  
 }

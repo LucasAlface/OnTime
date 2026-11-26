@@ -154,6 +154,9 @@ export default function Map() {
             >
               <strong>{selectedStop.name}</strong>
               <p className="popupStopCode">{selectedStop.code}</p>
+              <p className="popupStopCode">
+                Linhas: {selectedStop.routes?.map((relation) => relation.routeLine).join(", ") || "nenhuma"}
+              </p>
             </Popup>
           )}
         </MapLibreMap>

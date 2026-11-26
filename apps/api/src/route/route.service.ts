@@ -9,6 +9,7 @@ export class RouteService {
 
   async getRoutes() {
     const routes = await this.prisma.db.orm.public.Route
+      .include('stops')
       .all();
 
     return routes;

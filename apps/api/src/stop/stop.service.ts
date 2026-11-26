@@ -7,7 +7,9 @@ export class StopService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getStops() {
-    return this.prisma.db.orm.public.Stop.all();
+    return this.prisma.db.orm.public.Stop
+      .include('routes')
+      .all();
   }
 
   async createStop(stops: StopRequest | StopRequest[]) {
