@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Map as MapLibreMap,
   Marker,
@@ -43,6 +43,9 @@ export default function Map() {
   const [selectedBus, setSelectedBus] = useState(null);
   const [busCoordinates, setBusCoordinates] = useState({});
   const [mapZoom, setMapZoom] = useState(12.8);
+  const [stopSearch, setStopSearch] = useState("");
+  const [isStopSearchOpen, setIsStopSearchOpen] = useState(false);
+  const mapRef = useRef(null);
 
   const stopFeatures = {
     type: "FeatureCollection",
@@ -72,6 +75,11 @@ export default function Map() {
       return [...current, line];
     });
   }, [selectedRoutes]);
+
+  const clearRoutes = useCallback(() => {
+    setSelectedRoutes([]);
+    setSelectedBus(null);
+  }, []);
 
   useEffect(() => {
     getStops()
@@ -107,6 +115,28 @@ export default function Map() {
 
     const stop = stops.find((item) => item.code === feature.properties?.code);
     if (stop) setSelectedStop(stop);
+  };
+
+  const stopSearchResults = stopSearch.trim()
+    ? stops
+        .filter((stop) =>
+          `${stop.name} ${stop.code}`
+            .toLocaleLowerCase()
+            .includes(stopSearch.trim().toLocaleLowerCase()),
+        )
+        .slice(0, 8)
+    : [];
+
+  const selectStopFromSearch = (stop) => {
+    setSelectedBus(null);
+    setSelectedStop(stop);
+    setStopSearch(`${stop.name} (${stop.code})`);
+    setIsStopSearchOpen(false);
+    mapRef.current?.flyTo({
+      center: [Number(stop.lon), Number(stop.lat)],
+      zoom: Math.max(mapZoom, 16),
+      duration: 800,
+    });
   };
 
   useEffect(() => {
@@ -146,13 +176,46 @@ export default function Map() {
 
   return (
     <main className="stcp-map-page">
+      <div className="stopSearch">
+        <input
+          type="search"
+          value={stopSearch}
+          onChange={(event) => {
+            setStopSearch(event.target.value);
+            setIsStopSearchOpen(true);
+          }}
+          onFocus={() => setIsStopSearchOpen(true)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") setIsStopSearchOpen(false);
+          }}
+          placeholder="Pesquisar paragens por nome ou código"
+          aria-label="Pesquisar paragens por nome ou código"
+          aria-expanded={isStopSearchOpen && stopSearchResults.length > 0}
+        />
+        {isStopSearchOpen && stopSearch.trim() && (
+          <ul className="stopSearchResults">
+            {stopSearchResults.length > 0 ? stopSearchResults.map((stop) => (
+              <li key={stop.code}>
+                <button type="button" onClick={() => selectStopFromSearch(stop)}>
+                  <span>{stop.name}</span>
+                  <small>{stop.code}</small>
+                </button>
+              </li>
+            )) : (
+              <li className="stopSearchEmpty">Nenhuma paragem encontrada</li>
+            )}
+          </ul>
+        )}
+      </div>
       <RouteSidebar
         selectedRoutes={selectedRoutes}
         onToggleRoute={toggleRoute}
+        onClearRoutes={clearRoutes}
         onRoutesLoaded={handleRoutesLoaded}
       />
       <div className="mapCanvas">
         <MapLibreMap
+          ref={mapRef}
           initialViewState={{ longitude: -8.632, latitude: 41.163, zoom: 12.8 }}
           mapStyle={MAP_STYLE}
           workerUrl={MAPLIBRE_WORKER_URL}
