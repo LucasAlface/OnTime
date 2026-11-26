@@ -12,6 +12,7 @@ import {
 } from "@vis.gl/react-maplibre";
 import { getCoordinates } from "@/services/location/Tracker";
 import { getStops } from "@/components/stops/GetStops";
+import { logout } from "@/services/api/User";
 import RouteSidebar from "./RouteSidebar";
 
 const MAPLIBRE_WORKER_URL = new URL(
@@ -45,6 +46,8 @@ export default function Map() {
   const [mapZoom, setMapZoom] = useState(12.8);
   const [stopSearch, setStopSearch] = useState("");
   const [isStopSearchOpen, setIsStopSearchOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
   const mapRef = useRef(null);
 
   const stopFeatures = {
@@ -139,6 +142,20 @@ export default function Map() {
     });
   };
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    setLogoutError("");
+
+    try {
+      await logout();
+      window.location.assign("/Login");
+    } catch (error) {
+      console.error("Failed to log out:", error);
+      setLogoutError("Não foi possível terminar a sessão.");
+      setIsLoggingOut(false);
+    }
+  };
+
   useEffect(() => {
     const activeRoutes = getSelectedRoutes();
     const activeLines = new Set(activeRoutes.map((route) => String(route.line)));
@@ -207,6 +224,15 @@ export default function Map() {
           </ul>
         )}
       </div>
+      <button
+        className="mapLogout"
+        type="button"
+        onClick={handleLogout}
+        disabled={isLoggingOut}
+      >
+        {isLoggingOut ? "A sair…" : "Sair"}
+      </button>
+      {logoutError && <p className="mapLogoutError" role="alert">{logoutError}</p>}
       <RouteSidebar
         selectedRoutes={selectedRoutes}
         onToggleRoute={toggleRoute}

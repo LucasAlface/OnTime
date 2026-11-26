@@ -709,10 +709,48 @@ input {
   position: absolute;
   z-index: 12;
   top: 18px;
-  left: calc(50% + 159px);
-  width: min(460px, calc(100vw - 354px));
+  left: calc(50% + 105px);
+  width: min(460px, calc(100vw - 462px));
   transform: translateX(-50%);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.stcp-map-page .mapLogout {
+  position: fixed;
+  z-index: 9999;
+  top: 18px;
+  right: 58px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid #d6e2e7;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 5px 18px rgb(14 46 62 / 12%);
+  color: #075b7d;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.stcp-map-page .mapLogout:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.stcp-map-page .mapLogout:focus-visible {
+  outline: 2px solid #087e83;
+  outline-offset: 2px;
+}
+
+.stcp-map-page .mapLogoutError {
+  position: fixed;
+  z-index: 9999;
+  top: 60px;
+  right: 58px;
+  margin: 0;
+  color: #a12727;
+  font-size: 11px;
 }
 
 .stcp-map-page .stopSearchResults {
@@ -1075,8 +1113,17 @@ input {
   .stcp-map-page .stopSearch {
     top: 10px;
     left: 10px;
-    width: calc(100vw - 20px);
+    width: calc(100vw - 130px);
     transform: none;
+  }
+
+  .stcp-map-page .mapLogout {
+    top: 10px;
+  }
+
+  .stcp-map-page .mapLogoutError {
+    top: 50px;
+    right: 58px;
   }
 
   .stcp-map-page .routeSidebar {

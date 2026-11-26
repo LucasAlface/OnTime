@@ -2,6 +2,7 @@ import { Body, Controller, Post, Get, Res, Req, UnauthorizedException } from '@n
 import { AuthService } from './auth.service.js';
 import type { RegisterRequest, LoginRequest } from './auth.interfaces.js';
 import type { Response, Request } from 'express';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 
 
@@ -52,6 +53,15 @@ export class AuthController {
     }
     const { user } = await this.authService.me(token);
     return user;
+  }
+
+  @Post('logout')
+  @ApiTags('Authentication')
+  @ApiOperation({ summary: 'Terminar sessão e limpar o cookie de autenticação' })
+  @ApiOkResponse({ description: 'Sessão terminada' })
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('token', { path: '/' });
+    return { message: 'Logged out successfully' };
   }
 
 }
