@@ -32,24 +32,10 @@ export default function RegisterForm() {
       const response = axios.isAxiosError<unknown>(error)
         ? error.response
         : undefined;
-      const payload = response?.data;
-      const message =
-        payload && typeof payload === "object" && "message" in payload
-          ? payload.message
-          : undefined;
       setError(
-        typeof message === "string"
-          ? message
-          : Array.isArray(message)
-            ? message
-                .filter(
-                  (item: unknown): item is string => typeof item === "string",
-                )
-                .join(" ") ||
-              "We couldn't create your account. Please try again."
-            : response
-              ? "We couldn't create your account. Please try again."
-              : "Unable to reach OnTime. Check that the API is running.",
+        response
+          ? "Não foi possível criar a conta. Confirma os dados e tenta novamente."
+          : "Não foi possível contactar a OnTime. Confirma que a API está em execução.",
       );
     } finally {
       setIsSubmitting(false);
@@ -59,19 +45,19 @@ export default function RegisterForm() {
   return (
     <form className="auth-form" onSubmit={handleSubmit}>
       <div className="auth-field">
-        <label htmlFor="register-name">Name</label>
+        <label htmlFor="register-name">Nome</label>
         <input
           autoComplete="name"
           className="auth-input"
           id="register-name"
           name="name"
-          placeholder="Your name"
+          placeholder="O teu nome"
           required
           type="text"
         />
       </div>
       <div className="auth-field">
-        <label htmlFor="register-email">Email address</label>
+        <label htmlFor="register-email">Endereço de e-mail</label>
         <input
           autoComplete="email"
           className="auth-input"
@@ -83,13 +69,13 @@ export default function RegisterForm() {
         />
       </div>
       <div className="auth-field">
-        <label htmlFor="register-password">Password</label>
+        <label htmlFor="register-password">Palavra-passe</label>
         <input
           autoComplete="new-password"
           className="auth-input"
           id="register-password"
           name="password"
-          placeholder="Create a password"
+          placeholder="Cria uma palavra-passe"
           required
           type="password"
         />
@@ -101,7 +87,7 @@ export default function RegisterForm() {
       ) : null}
       <button className="auth-submit" disabled={isSubmitting} type="submit">
         <span>
-          {isSubmitting ? "Creating account…" : "Create account"}
+          {isSubmitting ? "A criar conta…" : "Criar conta"}
         </span>
         <span aria-hidden="true">→</span>
       </button>

@@ -22,40 +22,40 @@ interface AuthContent {
 
 const AUTH_CONTENT = {
   login: {
-    storyEyebrow: "WELCOME BACK",
+    storyEyebrow: "BEM-VINDO DE VOLTA",
     storyTitle: (
       <>
-        Your city,
+        A tua cidade,
         <br />
-        on your time.
+        ao teu ritmo.
       </>
     ),
     storyCopy:
-      "Sign in to pick up where your journey left off. Your routes and everyday connections are right here.",
-    cardEyebrow: "YOUR ONTIME ACCOUNT",
-    cardTitle: "Sign in",
-    cardDescription: "Enter your details to continue.",
+      "Inicia sessão para continuares a tua viagem. As tuas linhas e ligações do dia a dia estão aqui.",
+    cardEyebrow: "A TUA CONTA ONTIME",
+    cardTitle: "Iniciar sessão",
+    cardDescription: "Introduz os teus dados para continuar.",
     cardTitleId: "login-title",
-    switchPrompt: "New to OnTime?",
+    switchPrompt: "Ainda não tens conta?",
     switchHref: "/Register",
-    switchLabel: "Create an account",
+    switchLabel: "Criar conta",
   },
   register: {
-    storyEyebrow: "MOVE WITH ONTIME",
+    storyEyebrow: "VIAJA COM A ONTIME",
     storyTitle: (
       <>
-        Make every
+        Faz com que cada
         <br />
-        journey count.
+        viagem conte.
       </>
     ),
     storyCopy:
-      "A simpler way to stay connected to the city. Create an account and keep your public transport journeys in one place.",
-    cardEyebrow: "GET STARTED",
-    cardTitle: "Create your account",
-    cardDescription: "A few details, then you're ready to go.",
+      "Uma forma mais simples de te manteres ligado à cidade. Cria uma conta e reúne as tuas viagens de transportes públicos num só lugar.",
+    cardEyebrow: "COMEÇA AQUI",
+    cardTitle: "Criar conta",
+    cardDescription: "Só precisas de preencher alguns dados para começar.",
     cardTitleId: "register-title",
-    switchPrompt: "Already have an account?",
+    switchPrompt: "Já tens conta?",
     switchHref: "/Login",
     switchLabel: "Sign in",
   },
@@ -74,7 +74,7 @@ export default function Auth({ children, mode }: AuthProps) {
           </span>
           <span className="ontime-brand-copy">
             <strong>OnTime</strong>
-            <small>SMARTER CITY TRAVEL</small>
+          <small>TRANSPORTES À TUA MEDIDA</small>
           </span>
         </a>
         <span className="auth-header-note">
@@ -91,9 +91,9 @@ export default function Auth({ children, mode }: AuthProps) {
           <p className="auth-story-copy">{content.storyCopy}</p>
           <div aria-hidden="true" className="route-card">
             <div className="route-card-header">
-              <span>CITY CONNECTIONS</span>
+              <span>LIGAÇÕES NA CIDADE</span>
               <span className="route-live">
-                <i /> LIVE NETWORK
+                <i /> REDE EM TEMPO REAL
               </span>
             </div>
             <div className="route-visual">
@@ -108,7 +108,7 @@ export default function Auth({ children, mode }: AuthProps) {
             </div>
             <div className="route-card-footer">
               <b>204</b>
-              <span>One city. More ways to move.</span>
+              <span>Uma cidade. Mais formas de viajar.</span>
               <span>↗</span>
             </div>
           </div>
@@ -131,13 +131,13 @@ export default function Auth({ children, mode }: AuthProps) {
               {content.switchLabel} <span>→</span>
             </a>
           </div>
-          <p className="auth-card-legal">ON TIME, EVERY TIME.</p>
+          <p className="auth-card-legal">A TEMPO, SEMPRE.</p>
         </section>
       </div>
 
       <footer className="auth-footer">
         <span>© OnTime</span>
-        <span>Public transport, in sync with you.</span>
+        <span>Os transportes públicos ao teu ritmo.</span>
       </footer>
     </main>
   );

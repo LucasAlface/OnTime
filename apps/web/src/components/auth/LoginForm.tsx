@@ -37,17 +37,13 @@ export default function LoginForm() {
           ? payload.message
           : undefined;
       setError(
-        typeof message === "string"
-          ? message
-          : Array.isArray(message)
-            ? message
-                .filter(
-                  (item: unknown): item is string => typeof item === "string",
-                )
-                .join(" ") || "We couldn't sign you in. Please try again."
-            : response
-              ? "We couldn't sign you in. Please check your details and try again."
-              : "Unable to reach OnTime. Check that the API is running.",
+        !response
+          ? "Não foi possível contactar a OnTime. Confirma que a API está em execução."
+          : message === "User not found"
+            ? "Não existe uma conta com este endereço de e-mail."
+            : message === "Invalid password"
+              ? "A palavra-passe está incorreta."
+              : "Não foi possível iniciar sessão. Confirma os teus dados e tenta novamente.",
       );
     } finally {
       setIsSubmitting(false);
@@ -57,7 +53,7 @@ export default function LoginForm() {
   return (
     <form className="auth-form" onSubmit={handleSubmit}>
       <div className="auth-field">
-        <label htmlFor="login-email">Email address</label>
+        <label htmlFor="login-email">Endereço de e-mail</label>
         <input
           autoComplete="email"
           className="auth-input"
@@ -75,7 +71,7 @@ export default function LoginForm() {
           className="auth-input"
           id="login-password"
           name="password"
-          placeholder="Enter your password"
+          placeholder="Introduz a tua palavra-passe"
           required
           type="password"
         />
@@ -86,7 +82,7 @@ export default function LoginForm() {
         </p>
       ) : null}
       <button className="auth-submit" disabled={isSubmitting} type="submit">
-        <span>{isSubmitting ? "Signing in…" : "Sign in"}</span>
+        <span>{isSubmitting ? "A iniciar sessão…" : "Iniciar sessão"}</span>
         <span aria-hidden="true">→</span>
       </button>
     </form>
