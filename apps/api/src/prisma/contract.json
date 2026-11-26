@@ -503,6 +503,7 @@
                     "name": "RouteStop_routeLine_idx_3ce36778"
                   },
                   "onDelete": "cascade",
+                  "onUpdate": "cascade",
                   "source": {
                     "columns": [
                       "routeLine"
@@ -523,6 +524,7 @@
                     "name": "RouteStop_stopCode_idx_beae5384"
                   },
                   "onDelete": "cascade",
+                  "onUpdate": "cascade",
                   "source": {
                     "columns": [
                       "stopCode"
@@ -765,7 +767,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "a33ea7e7020b20354710208634465d84695e481585baf487d5d92de920fcba4f"
+    "storageHash": "f5bc59b1ff1fef9ca061f273b78c311950185099fae7ed4c768eb14f61d661ba"
   },
   "execution": {
     "executionHash": "0071f96a90cbdaa83701578241c0445f90dd824b9779305cb291fce092ef79a0",

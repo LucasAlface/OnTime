@@ -15,9 +15,10 @@ type BusEntity = {
     location: { value: { coordinates: [number, number] } };
 };
 
-async function getRouteInfo(route: string) {
+async function getRouteInfo(route: string, signal?: AbortSignal) {
     const response = await axios.get(
-        `https://broker.fiware.urbanplatform.portodigital.pt/v2/entities?q=vehicleType==bus;annotations==stcp:route:${route}`
+        `https://broker.fiware.urbanplatform.portodigital.pt/v2/entities?q=vehicleType==bus;annotations==stcp:route:${route}`,
+        { signal },
     );
     return response.data;
 }
@@ -28,13 +29,21 @@ export async function getRoutes() {
 } 
 
 export async function getCoordinates(
-    onUpdate: (buses: BusLocation[]) => void, route: string
+    onUpdate: (buses: BusLocation[]) => void,
+    route: string,
+    signal?: AbortSignal,
 ) {
     const lastByVehicle = new Map<string, string>();
 
-    while (true) {
+    while (!signal?.aborted) {
         const requestStartedAt = Date.now();
-        const entities: BusEntity[] = await getRouteInfo(route);
+        let entities: BusEntity[];
+        try {
+            entities = await getRouteInfo(route, signal);
+        } catch (error) {
+            if (signal?.aborted) return;
+            throw error;
+        }
         const changedBuses: BusLocation[] = [];
 
         for (const bus of entities) {

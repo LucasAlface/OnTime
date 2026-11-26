@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Map as MapLibreMap,
   Marker,
@@ -8,10 +8,9 @@ import {
   Popup,
   ScaleControl,
 } from "@vis.gl/react-maplibre";
-import { getCoordinates, getRoutes } from "@/services/location/Tracker";
+import { getCoordinates } from "@/services/location/Tracker";
 import { getStops } from "@/components/stops/GetStops";
-
-const ROUTES = await getRoutes();
+import RouteSidebar from "./RouteSidebar";
 
 const MAP_STYLE = {
   version: 8,
@@ -28,9 +27,28 @@ const MAP_STYLE = {
 
 export default function Map() {
   const [stops, setStops] = useState([]);
+  const [routes, setRoutes] = useState([]);
+  const [selectedRoutes, setSelectedRoutes] = useState([]);
   const [selectedStop, setSelectedStop] = useState(null);
   const [selectedBus, setSelectedBus] = useState(null);
   const [busCoordinates, setBusCoordinates] = useState({});
+
+  const handleRoutesLoaded = useCallback((loadedRoutes) => {
+    setRoutes(loadedRoutes);
+  }, []);
+
+  const toggleRoute = useCallback((line) => {
+    if (selectedRoutes.includes(line)) {
+      setSelectedBus((bus) => (bus?.line === line ? null : bus));
+    }
+    setSelectedRoutes((current) => {
+      const isSelected = current.includes(line);
+      if (isSelected) {
+        return current.filter((selectedLine) => selectedLine !== line);
+      }
+      return [...current, line];
+    });
+  }, [selectedRoutes]);
 
   useEffect(() => {
     getStops()
@@ -38,30 +56,51 @@ export default function Map() {
       .catch((error) => console.error("Failed to load stops:", error));
   }, []);
 
+  const getSelectedRoutes = () =>
+    routes.filter((route) => selectedRoutes.includes(String(route.line)));
+
   useEffect(() => {
-    ROUTES.forEach(({ line }) => {
+    const activeRoutes = getSelectedRoutes();
+    const activeLines = new Set(activeRoutes.map((route) => String(route.line)));
+    const controllers = activeRoutes.map(() => new AbortController());
+
+    setBusCoordinates((current) =>
+      Object.fromEntries(
+        Object.entries(current).filter(([, bus]) => activeLines.has(bus.line)),
+      ),
+    );
+
+    activeRoutes.forEach((route, index) => {
+      const line = String(route.line);
       getCoordinates((buses) => {
         setBusCoordinates((current) => {
           const next = { ...current };
-
           for (const bus of buses) {
             const [longitude, latitude] = bus.coordinates;
             if (Number.isFinite(longitude) && Number.isFinite(latitude)) {
               next[bus.id] = { ...bus, longitude, latitude };
             }
           }
-
           return next;
         });
-      }, line).catch((error) => {
-        console.error(`Failed to update bus location for route ${line}:`, error);
+      }, line, controllers[index].signal).catch((error) => {
+        if (!controllers[index].signal.aborted) {
+          console.error(`Failed to update bus location for route ${line}:`, error);
+        }
       });
     });
-  }, []);
+
+    return () => controllers.forEach((controller) => controller.abort());
+  }, [routes, selectedRoutes]);
     
 
   return (
     <main className="stcp-map-page">
+      <RouteSidebar
+        selectedRoutes={selectedRoutes}
+        onToggleRoute={toggleRoute}
+        onRoutesLoaded={handleRoutesLoaded}
+      />
       <div className="mapCanvas">
         <MapLibreMap
           initialViewState={{ longitude: -8.632, latitude: 41.163, zoom: 12.8 }}
@@ -89,14 +128,13 @@ export default function Map() {
                 }}
               >
                 <span className="stopPin"></span>
-                <span className="stopLabel">{stop.name}</span>
               </button>
             </Marker>
           ))}
 
           {Object.values(busCoordinates).map((bus) => (
             (() => {
-              const routeName = ROUTES.find((item) => String(item.line) === bus.line)?.name;
+              const routeName = routes.find((item) => String(item.line) === bus.line)?.name;
               const displayRouteName = bus.sentido === "1" && routeName?.includes("-")
                 ? routeName.split("-").map((part) => part.trim()).reverse().join(" - ")
                 : routeName;

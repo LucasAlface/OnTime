@@ -57,8 +57,8 @@ model RouteStop {
   routeLine String
   stopCode  String
 
-  route Route @relation(fields: [routeLine], references: [line], onDelete: Cascade)
-  stop  Stop  @relation(fields: [stopCode], references: [code], onDelete: Cascade)
+  route Route @relation(fields: [routeLine], references: [line], onDelete: Cascade, onUpdate: Cascade)
+  stop  Stop  @relation(fields: [stopCode], references: [code], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([routeLine, stopCode])
 }
