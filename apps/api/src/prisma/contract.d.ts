@@ -25,7 +25,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'f5bc59b1ff1fef9ca061f273b78c311950185099fae7ed4c768eb14f61d661ba'>;
+  StorageHashBase<'079d2fbcc31fafed687e822ceea8b06bf89280f9d5fb24dd03c435efa0b7b8f0'>;
 export type ExecutionHash =
   ExecutionHashBase<'0071f96a90cbdaa83701578241c0445f90dd824b9779305cb291fce092ef79a0'>;
 export type ProfileHash =
@@ -312,6 +312,13 @@ export type StorageColumnInputTypes = ColumnTypesFromStorage<
 >;
 
 export namespace Models {
+  export type public_Favourites = {
+    routeLine: FieldOutputTypes['public']['Favourites']['routeLine'];
+    userId: FieldOutputTypes['public']['Favourites']['userId'];
+    route: public_Route;
+    user: public_User;
+    readonly [RelationKeys]?: 'route' | 'user';
+  };
   export type public_Route = {
     createdAt: FieldOutputTypes['public']['Route']['createdAt'];
     line: FieldOutputTypes['public']['Route']['line'];
@@ -353,12 +360,14 @@ export namespace Models {
     name: FieldOutputTypes['public']['User']['name'];
     passwordHash: FieldOutputTypes['public']['User']['passwordHash'];
     updatedAt: FieldOutputTypes['public']['User']['updatedAt'];
-    readonly [RelationKeys]?: never;
+    favourites: public_Favourites[];
+    readonly [RelationKeys]?: 'favourites';
   };
 }
 
 export declare const models: {
   public: {
+    Favourites: Models.public_Favourites;
     Route: Models.public_Route;
     RouteStop: Models.public_RouteStop;
     SpatialRefSys: Models.public_SpatialRefSys;
@@ -385,6 +394,63 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
+            readonly Favourites: {
+              columns: {
+                readonly routeLine: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly userId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'Favourites_routeLine_idx_3ce36778';
+                  readonly prefix: 'Favourites_routeLine_idx';
+                  readonly columns: readonly ['routeLine'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'Favourites_userId_idx_a489d58a';
+                  readonly prefix: 'Favourites_userId_idx';
+                  readonly columns: readonly ['userId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Favourites';
+                    readonly columns: readonly ['userId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Favourites';
+                    readonly columns: readonly ['routeLine'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Route';
+                    readonly columns: readonly ['line'];
+                  };
+                },
+              ];
+            };
             readonly Route: {
               columns: {
                 readonly createdAt: {
@@ -648,6 +714,10 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
+    readonly Favourites: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'Favourites';
+    };
     readonly Route: { readonly namespace: 'public' & NamespaceId; readonly model: 'Route' };
     readonly RouteStop: { readonly namespace: 'public' & NamespaceId; readonly model: 'RouteStop' };
     readonly Stop: { readonly namespace: 'public' & NamespaceId; readonly model: 'Stop' };
@@ -661,6 +731,49 @@ type ContractBase = Omit<
     readonly namespaces: {
       readonly public: {
         readonly models: {
+          readonly Favourites: {
+            readonly fields: {
+              readonly routeLine: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly userId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+            };
+            readonly relations: {
+              readonly route: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Route';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['routeLine'];
+                  readonly targetFields: readonly ['line'];
+                };
+              };
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'Favourites';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly routeLine: { readonly column: 'routeLine' };
+                readonly userId: { readonly column: 'userId' };
+              };
+            };
+          };
           readonly Route: {
             readonly fields: {
               readonly createdAt: {
@@ -904,7 +1017,19 @@ type ContractBase = Omit<
                 };
               };
             };
-            readonly relations: Record<string, never>;
+            readonly relations: {
+              readonly favourites: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Favourites';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['userId'];
+                };
+              };
+            };
             readonly storage: {
               readonly table: 'User';
               readonly namespaceId: 'public';

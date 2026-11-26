@@ -29,6 +29,7 @@ model User {
   id           Int                @id @default(autoincrement())
   email        String             @unique
   name         String?
+  favourites   Favourites[]
   passwordHash String
   createdAt    DateTime           @default(now()) @onCreate(now())
   updatedAt    temporal.UpdatedAt
@@ -65,9 +66,9 @@ model RouteStop {
 
 model Favourites {
   userId    Int
-  route      String
+  routeLine String 
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  route  Route  @relation(fields: [route], references: [line], onDelete: Cascade, onUpdate: Cascade)
+  route  Route  @relation(fields: [routeLine], references: [line], onDelete: Cascade, onUpdate: Cascade)
 
 }

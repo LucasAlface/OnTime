@@ -4,6 +4,10 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
+    "Favourites": {
+      "model": "Favourites",
+      "namespace": "public"
+    },
     "Route": {
       "model": "Route",
       "namespace": "public"
@@ -29,6 +33,70 @@
     "namespaces": {
       "public": {
         "models": {
+          "Favourites": {
+            "fields": {
+              "routeLine": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "route": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "routeLine"
+                  ],
+                  "targetFields": [
+                    "line"
+                  ]
+                },
+                "to": {
+                  "model": "Route",
+                  "namespace": "public"
+                }
+              },
+              "user": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "userId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "routeLine": {
+                  "column": "routeLine"
+                },
+                "userId": {
+                  "column": "userId"
+                }
+              },
+              "namespaceId": "public",
+              "table": "Favourites"
+            }
+          },
           "Route": {
             "fields": {
               "createdAt": {
@@ -390,7 +458,23 @@
                 }
               }
             },
-            "relations": {},
+            "relations": {
+              "favourites": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "userId"
+                  ]
+                },
+                "to": {
+                  "model": "Favourites",
+                  "namespace": "public"
+                }
+              }
+            },
             "storage": {
               "fields": {
                 "createdAt": {
@@ -431,6 +515,83 @@
             }
           },
           "table": {
+            "Favourites": {
+              "columns": {
+                "routeLine": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "userId": {
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "index": {
+                    "name": "Favourites_userId_idx_a489d58a"
+                  },
+                  "onDelete": "cascade",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "userId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Favourites"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "User"
+                  }
+                },
+                {
+                  "index": {
+                    "name": "Favourites_routeLine_idx_3ce36778"
+                  },
+                  "onDelete": "cascade",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "routeLine"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Favourites"
+                  },
+                  "target": {
+                    "columns": [
+                      "line"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Route"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "routeLine"
+                  ],
+                  "name": "Favourites_routeLine_idx_3ce36778",
+                  "prefix": "Favourites_routeLine_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "userId"
+                  ],
+                  "name": "Favourites_userId_idx_a489d58a",
+                  "prefix": "Favourites_userId_idx",
+                  "unique": false
+                }
+              ],
+              "uniques": []
+            },
             "Route": {
               "columns": {
                 "createdAt": {
@@ -767,7 +928,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "f5bc59b1ff1fef9ca061f273b78c311950185099fae7ed4c768eb14f61d661ba"
+    "storageHash": "079d2fbcc31fafed687e822ceea8b06bf89280f9d5fb24dd03c435efa0b7b8f0"
   },
   "execution": {
     "executionHash": "0071f96a90cbdaa83701578241c0445f90dd824b9779305cb291fce092ef79a0",

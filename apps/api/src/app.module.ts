@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { RouteModule } from './route/route.module.js';
 import { StopModule } from './stop/stop.module.js';
 import { RouteStopModule } from './route_stop/route_stop.module.js';
+import { FavouritesModule } from './favourites/favourites.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -23,6 +24,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     RouteModule,
     StopModule,
     RouteStopModule,
+    FavouritesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
