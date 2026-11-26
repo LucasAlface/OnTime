@@ -46,6 +46,7 @@ export default function Map() {
   const [mapZoom, setMapZoom] = useState(12.8);
   const [stopSearch, setStopSearch] = useState("");
   const [isStopSearchOpen, setIsStopSearchOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState("");
   const mapRef = useRef(null);
@@ -193,6 +194,18 @@ export default function Map() {
 
   return (
     <main className="stcp-map-page">
+      <button
+        className="mapSidebarToggle"
+        type="button"
+        onClick={() => setIsSidebarOpen((open) => !open)}
+        aria-label={isSidebarOpen ? "Esconder linhas" : "Mostrar linhas"}
+        aria-expanded={isSidebarOpen}
+        aria-controls="route-sidebar"
+      >
+        <span />
+        <span />
+        <span />
+      </button>
       <div className="stopSearch">
         <input
           type="search"
@@ -234,6 +247,7 @@ export default function Map() {
       </button>
       {logoutError && <p className="mapLogoutError" role="alert">{logoutError}</p>}
       <RouteSidebar
+        isOpen={isSidebarOpen}
         selectedRoutes={selectedRoutes}
         onToggleRoute={toggleRoute}
         onClearRoutes={clearRoutes}

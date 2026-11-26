@@ -9,6 +9,7 @@ import {
 import { getRoutes } from "@/services/location/Tracker";
 
 export default function RouteSidebar({
+  isOpen,
   selectedRoutes,
   onToggleRoute,
   onClearRoutes,
@@ -112,7 +113,11 @@ export default function RouteSidebar({
   );
 
   return (
-    <aside className="routeSidebar" aria-label="Linhas STCP">
+    <aside
+      className={`routeSidebar${isOpen ? " isOpen" : " isClosed"}`}
+      id="route-sidebar"
+      aria-label="Linhas STCP"
+    >
       <div className="routeSidebarHeader">
         <h2>Linhas</h2>
       </div>
