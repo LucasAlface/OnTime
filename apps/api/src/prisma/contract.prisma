@@ -70,5 +70,6 @@ model Favourites {
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   route  Route  @relation(fields: [routeLine], references: [line], onDelete: Cascade, onUpdate: Cascade)
-
+  
+  @@id([userId, routeLine])
 }

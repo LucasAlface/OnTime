@@ -617,10 +617,46 @@ input {
 
 .stcp-map-page .routeSidebar li label {
   display: flex;
+  flex: 1;
+  min-width: 0;
   min-height: 36px;
   align-items: center;
   gap: 9px;
   cursor: pointer;
+}
+
+.stcp-map-page .routeSidebar li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stcp-map-page .routeSidebarFavorite {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #6d828c;
+  font-size: 19px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.stcp-map-page .routeSidebarFavorite:hover:not(:disabled),
+.stcp-map-page .routeSidebarFavorite.isFavorite {
+  color: #d99b00;
+}
+
+.stcp-map-page .routeSidebarFavorite:focus-visible {
+  outline: 2px solid #087e83;
+  outline-offset: 1px;
+}
+
+.stcp-map-page .routeSidebarFavorite:disabled {
+  cursor: wait;
 }
 
 .stcp-map-page .routeSidebar input {
